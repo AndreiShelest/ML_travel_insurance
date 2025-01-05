@@ -3,4 +3,14 @@ model_options:
   random_state: 12345
 
 travel_insurance:
-  target_col: 'Claim'
+  target_col: 'claim'
+  encoding:
+    one_hot_cols: 
+      - 'agency_type'
+      - 'distribution_channel'
+      - 'gender'
+    catboost:
+      cols:
+        - 'agency'
+        - 'destination'
+        - 'product_name'

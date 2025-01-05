@@ -39,9 +39,15 @@
 # (transcoding), templating and a way to reuse arguments that are frequently repeated. See more here:
 # https://docs.kedro.org/en/stable/data/data_catalog.html
 
+travel_insurance_raw:
+  type: pandas.CSVDataset
+  filepath: data/01_raw/travel_insurance_raw.csv
+
 travel_insurance:
   type: pandas.CSVDataset
   filepath: data/01_raw/travel_insurance.csv
+  save_args:
+    lineterminator: "\n"
 
 TI_train_raw:
   type: pandas.CSVDataset
