@@ -90,6 +90,11 @@ catboost_encoder:
   filepath: data/04_feature/catboost_encoder.pkl
   backend: pickle
 
+std_scaler:
+  type: pickle.PickleDataset
+  filepath: data/04_feature/std_scaler.pkl
+  backend: pickle
+
 TI_test_feature:
   type: pandas.CSVDataset
   filepath: data/04_feature/TI_test_feature.csv

@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from category_encoders.cat_boost import CatBoostEncoder
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 
 
 def split_data(data: pd.DataFrame, model_options: dict, data_params: dict) -> tuple:
@@ -23,6 +24,23 @@ def split_data(data: pd.DataFrame, model_options: dict, data_params: dict) -> tu
 def impute_data(data: pd.DataFrame) -> pd.DataFrame:
     data.loc[data['gender'].isna(), 'gender'] = 'Missing'
 
+    return data
+
+
+def std_scale_data_train(
+    data: pd.DataFrame, scaler_cols: list[str]
+) -> tuple[pd.DataFrame, StandardScaler]:
+    std_scaler = StandardScaler()
+
+    data[scaler_cols] = std_scaler.fit_transform(data.loc[:, scaler_cols])
+
+    return data, std_scaler
+
+
+def std_scale_data_test(
+    data: pd.DataFrame, scaler_cols: list[str], std_scaler: StandardScaler
+) -> pd.DataFrame:
+    data[scaler_cols] = std_scaler.transform(data.loc[:, scaler_cols])
     return data
 
 

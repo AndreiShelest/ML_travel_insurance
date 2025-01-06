@@ -6,6 +6,8 @@ from .nodes import (
     encode_categorical_test,
     impute_data,
     create_features,
+    std_scale_data_train,
+    std_scale_data_test,
 )
 
 
@@ -45,8 +47,14 @@ def create_data_science_pipeline(**kwargs) -> Pipeline:
                 name='encode_categorical_train',
             ),
             node(
+                func=std_scale_data_train,
+                inputs=['TI_train_enc', 'params:travel_insurance.scaler.std'],
+                outputs=['TI_train_scaled', 'std_scaler'],
+                name='std_scale_data_train',
+            ),
+            node(
                 func=create_features,
-                inputs='TI_train_enc',
+                inputs='TI_train_scaled',
                 outputs='TI_train_feature',
                 name='create_features_train',
             ),
@@ -72,8 +80,18 @@ def create_data_science_pipeline(**kwargs) -> Pipeline:
                 name='encode_categorical_test',
             ),
             node(
+                func=std_scale_data_test,
+                inputs=[
+                    'TI_train_enc',
+                    'params:travel_insurance.scaler.std',
+                    'std_scaler',
+                ],
+                outputs='TI_test_scaled',
+                name='std_scale_data_test',
+            ),
+            node(
                 func=create_features,
-                inputs='TI_test_enc',
+                inputs='TI_test_scaled',
                 outputs='TI_test_feature',
                 name='create_features_test',
             ),

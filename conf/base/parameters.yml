@@ -14,3 +14,6 @@ travel_insurance:
         - 'agency'
         - 'destination'
         - 'product_name'
+  scaler:
+    std:
+      - 'net_sales'
