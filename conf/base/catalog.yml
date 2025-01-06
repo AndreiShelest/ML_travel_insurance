@@ -79,7 +79,25 @@ TI_train_feature:
   save_args:
     lineterminator: "\n"
 
+TI_y_train_feature:
+  type: pandas.CSVDataset
+  filepath: data/04_feature/TI_y_train_feature.csv
+  save_args:
+    lineterminator: "\n"
+
 catboost_encoder:
   type: pickle.PickleDataset
   filepath: data/04_feature/catboost_encoder.pkl
   backend: pickle
+
+TI_test_feature:
+  type: pandas.CSVDataset
+  filepath: data/04_feature/TI_test_feature.csv
+  save_args:
+    lineterminator: "\n"
+
+TI_y_test_feature:
+  type: pandas.CSVDataset
+  filepath: data/04_feature/TI_y_test_feature.csv
+  save_args:
+    lineterminator: "\n"
