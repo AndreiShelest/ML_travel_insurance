@@ -43,3 +43,13 @@ def encode_categorical_train(
     data_encoded = catboost_encoder.fit_transform(data_encoded, target_encoded)
 
     return data_encoded, target_encoded, catboost_encoder
+
+
+def create_features(data: pd.DataFrame) -> pd.DataFrame:
+    data['duration'] = np.where(data['duration'] < 0, 0, data['duration'])
+    data['duration_sqrt'] = np.sqrt(data['duration'])
+
+    data['net_sales_3'] = data['net_sales'] ** (1 / 3)
+    data['commision_sqrt'] = data['commision'] ** 0.5
+
+    return data

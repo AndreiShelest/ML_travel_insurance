@@ -45,30 +45,41 @@ travel_insurance_raw:
 
 travel_insurance:
   type: pandas.CSVDataset
-  filepath: data/01_raw/travel_insurance.csv
+  filepath: data/02_intermediate/travel_insurance.csv
   save_args:
     lineterminator: "\n"
 
-TI_train_raw:
+TI_train:
   type: pandas.CSVDataset
-  filepath: data/01_raw/TI_train_raw.csv
+  filepath: data/03_primary/TI_train.csv
   save_args:
     lineterminator: "\n"
 
-TI_test_raw:
+TI_test:
   type: pandas.CSVDataset
-  filepath: data/01_raw/TI_test_raw.csv
+  filepath: data/03_primary/TI_test.csv
   save_args:
     lineterminator: "\n"
 
-TI_y_train_raw:
+TI_y_train:
   type: pandas.CSVDataset
-  filepath: data/01_raw/TI_y_train_raw.csv
+  filepath: data/03_primary/TI_y_train.csv
   save_args:
     lineterminator: "\n"
 
-TI_y_test_raw:
+TI_y_test:
   type: pandas.CSVDataset
-  filepath: data/01_raw/TI_y_test_raw.csv
+  filepath: data/03_primary/TI_y_test.csv
   save_args:
     lineterminator: "\n"
+
+TI_train_feature:
+  type: pandas.CSVDataset
+  filepath: data/04_feature/TI_train_feature.csv
+  save_args:
+    lineterminator: "\n"
+
+catboost_encoder:
+  type: pickle.PickleDataset
+  filepath: data/04_feature/catboost_encoder.pkl
+  backend: pickle
