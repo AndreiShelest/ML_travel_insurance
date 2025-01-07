@@ -82,7 +82,7 @@ def create_data_science_pipeline(**kwargs) -> Pipeline:
             node(
                 func=std_scale_data_test,
                 inputs=[
-                    'TI_train_enc',
+                    'TI_test_enc',
                     'params:travel_insurance.scaler.std',
                     'std_scaler',
                 ],

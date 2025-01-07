@@ -17,3 +17,5 @@ travel_insurance:
   scaler:
     std:
       - 'net_sales'
+      - 'commision'
+      - 'duration'

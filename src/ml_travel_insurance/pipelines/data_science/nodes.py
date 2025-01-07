@@ -32,7 +32,8 @@ def std_scale_data_train(
 ) -> tuple[pd.DataFrame, StandardScaler]:
     std_scaler = StandardScaler()
 
-    data[scaler_cols] = std_scaler.fit_transform(data.loc[:, scaler_cols])
+    scaler_cols_std = [f'{col}_std' for col in scaler_cols]
+    data[scaler_cols_std] = std_scaler.fit_transform(data.loc[:, scaler_cols])
 
     return data, std_scaler
 
@@ -40,7 +41,8 @@ def std_scale_data_train(
 def std_scale_data_test(
     data: pd.DataFrame, scaler_cols: list[str], std_scaler: StandardScaler
 ) -> pd.DataFrame:
-    data[scaler_cols] = std_scaler.transform(data.loc[:, scaler_cols])
+    scaler_cols_std = [f'{col}_std' for col in scaler_cols]
+    data[scaler_cols_std] = std_scaler.transform(data.loc[:, scaler_cols])
     return data
 
 
@@ -85,8 +87,6 @@ def encode_categorical_test(
 def create_features(data: pd.DataFrame) -> pd.DataFrame:
     data['duration'] = np.where(data['duration'] < 0, 0, data['duration'])
     data['duration_sqrt'] = np.sqrt(data['duration'])
-
-    data['net_sales_3'] = data['net_sales'] ** (1 / 3)
-    data['commision_sqrt'] = data['commision'] ** 0.5
+    data['commision_sqrt'] = np.sqrt(data['commision'])
 
     return data
