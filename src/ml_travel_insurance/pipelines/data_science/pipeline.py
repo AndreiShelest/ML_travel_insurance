@@ -8,6 +8,7 @@ from .nodes import (
     create_features,
     std_scale_data_train,
     std_scale_data_test,
+    train_logistic_regression,
 )
 
 
@@ -94,6 +95,17 @@ def create_data_science_pipeline(**kwargs) -> Pipeline:
                 inputs='TI_test_scaled',
                 outputs='TI_test_feature',
                 name='create_features_test',
+            ),
+            # training models
+            node(
+                func=train_logistic_regression,
+                inputs=[
+                    'TI_train_feature',
+                    'TI_y_train_feature',
+                    'params:model_options.random_state',
+                ],
+                outputs='logit_trained',
+                name='train_logit',
             ),
         ]
     )
