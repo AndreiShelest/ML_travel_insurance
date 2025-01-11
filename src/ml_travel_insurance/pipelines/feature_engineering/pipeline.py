@@ -6,13 +6,12 @@ from .nodes import (
     encode_categorical_test,
     std_scale_data_train,
     std_scale_data_test,
-    train_logistic_regression,
     other_feature_transformation_train,
     other_feature_transformation_test,
 )
 
 
-def create_data_science_pipeline(**kwargs) -> Pipeline:
+def create_pipeline(**kwargs) -> Pipeline:
     return pipeline(
         [
             node(
@@ -83,17 +82,6 @@ def create_data_science_pipeline(**kwargs) -> Pipeline:
                 ],
                 outputs='TI_test_feature',
                 name='std_scale_data_test',
-            ),
-            # training models
-            node(
-                func=train_logistic_regression,
-                inputs=[
-                    'TI_train_feature',
-                    'TI_y_train_feature',
-                    'params:model_options.random_state',
-                ],
-                outputs='logit_trained',
-                name='train_logit',
             ),
         ]
     )

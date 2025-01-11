@@ -10,7 +10,7 @@ def rename_cols(data: pd.DataFrame) -> pd.DataFrame:
     return data.rename(columns=rename_map)
 
 
-def create_data_processing_pipeline(**kwargs) -> Pipeline:
+def create_pipeline(**kwargs) -> Pipeline:
     return pipeline(
         [
             node(
