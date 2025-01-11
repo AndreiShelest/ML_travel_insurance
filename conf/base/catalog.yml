@@ -110,3 +110,7 @@ TI_y_test_feature:
 logit_trained:
   type: pickle.PickleDataset
   filepath: data/06_models/logit_trained.pkl
+
+nn_trained:
+  type: pickle.PickleDataset
+  filepath: data/06_models/nn_trained.pkl
