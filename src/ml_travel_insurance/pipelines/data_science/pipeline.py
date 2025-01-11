@@ -4,11 +4,11 @@ from .nodes import (
     split_data,
     encode_categorical_train,
     encode_categorical_test,
-    impute_data,
-    create_features,
     std_scale_data_train,
     std_scale_data_test,
     train_logistic_regression,
+    other_feature_transformation_train,
+    other_feature_transformation_test,
 )
 
 
@@ -32,15 +32,15 @@ def create_data_science_pipeline(**kwargs) -> Pipeline:
             ),
             # train part
             node(
-                func=impute_data,
+                func=other_feature_transformation_train,
                 inputs='TI_train',
-                outputs='TI_train_imp',
-                name='impute_data_train',
+                outputs=['TI_train_other_feature', 'other_train_params'],
+                name='other_features_train',
             ),
             node(
                 func=encode_categorical_train,
                 inputs=[
-                    'TI_train_imp',
+                    'TI_train_other_feature',
                     'TI_y_train',
                     'params:travel_insurance.encoding',
                 ],
@@ -50,26 +50,20 @@ def create_data_science_pipeline(**kwargs) -> Pipeline:
             node(
                 func=std_scale_data_train,
                 inputs=['TI_train_enc', 'params:travel_insurance.scaler.std'],
-                outputs=['TI_train_scaled', 'std_scaler'],
+                outputs=['TI_train_feature', 'std_scaler'],
                 name='std_scale_data_train',
-            ),
-            node(
-                func=create_features,
-                inputs='TI_train_scaled',
-                outputs='TI_train_feature',
-                name='create_features_train',
             ),
             # test part
             node(
-                func=impute_data,
-                inputs='TI_test',
-                outputs='TI_test_imp',
-                name='impute_data_test',
+                func=other_feature_transformation_test,
+                inputs=['TI_test', 'other_train_params'],
+                outputs='TI_test_other_feature',
+                name='other_features_test',
             ),
             node(
                 func=encode_categorical_test,
                 inputs=[
-                    'TI_test_imp',
+                    'TI_test_other_feature',
                     'TI_y_test',
                     'params:travel_insurance.encoding',
                     'catboost_encoder',
@@ -87,14 +81,8 @@ def create_data_science_pipeline(**kwargs) -> Pipeline:
                     'params:travel_insurance.scaler.std',
                     'std_scaler',
                 ],
-                outputs='TI_test_scaled',
-                name='std_scale_data_test',
-            ),
-            node(
-                func=create_features,
-                inputs='TI_test_scaled',
                 outputs='TI_test_feature',
-                name='create_features_test',
+                name='std_scale_data_test',
             ),
             # training models
             node(
