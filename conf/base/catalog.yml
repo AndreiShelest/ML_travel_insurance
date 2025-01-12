@@ -118,3 +118,7 @@ nn_trained:
 xgboost_trained:
   type: pickle.PickleDataset
   filepath: data/06_models/xgboost_trained.pkl
+
+lgbm_trained:
+  type: pickle.PickleDataset
+  filepath: data/06_models/lgbm_trained.pkl

@@ -3,8 +3,6 @@ import numpy as np
 from category_encoders.cat_boost import CatBoostEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import LogisticRegression, ElasticNetCV
-from sklearn.model_selection import GridSearchCV
 
 
 def split_data(data: pd.DataFrame, model_options: dict, data_params: dict) -> tuple:
@@ -119,5 +117,3 @@ def _create_features(data: pd.DataFrame) -> pd.DataFrame:
     )
 
     return data
-
-

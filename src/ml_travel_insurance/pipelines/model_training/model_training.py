@@ -10,6 +10,7 @@ from sklearn.model_selection import (
     RandomizedSearchCV,
     train_test_split,
 )
+from lightgbm import LGBMClassifier
 from scipy.stats import uniform, randint
 
 import tensorflow as tf
@@ -221,18 +222,6 @@ def train_xgboost(
     random_state = model_options['random_state']
     test_size = model_options['test_size']
 
-    # param_grid = {
-    #     'n_estimators': np.arange(20, 201, 20),
-    #     'max_depth': [1, 2, 3, 5, 7, 10],
-    #     'max_leaves': np.arange(0, 11, 2),
-    #     'learning_rate': [0.01, 0.05, 0.1, 0.3, 0.4, 0.5],
-    #     'max_delta_step': np.arange(0, 11, 1),
-    #     'subsample': np.arange(0.2, 1.01, 0.2),
-    #     'reg_alpha': np.arange(0, 2.01, 0.2),
-    #     'reg_lambda': np.arange(0, 2.01, 0.2),
-    #     'scale_pos_weight': [1, 10, 20, 50, 100, 200, 1000],
-    # }
-
     param_distrs = {
         'n_estimators': randint(low=20, high=201),
         'max_depth': randint(low=1, high=11),
@@ -244,7 +233,6 @@ def train_xgboost(
         'reg_lambda': uniform(loc=0, scale=5),
         'scale_pos_weight': uniform(loc=1, scale=1000),
     }
-    # param_grid = {'n_estimators': [200], 'max_depth': [3], 'scale_pos_weight': [100]}
 
     xgb_cls = XGBClassifier(
         objective='binary:logistic', random_state=random_state, eval_metric='aucpr'
@@ -256,7 +244,7 @@ def train_xgboost(
         n_iter=10000,
         scoring='average_precision',
         n_jobs=4,
-        verbose=3,
+        verbose=10,
         random_state=random_state,
     )
 
@@ -277,3 +265,62 @@ def train_xgboost(
     best_cloned.fit(bX_train, bY_train, eval_set=[(bX_val, bY_val)])
 
     return {'final_model': best_cloned, 'best_params': xgboost_cv.best_params_}
+
+
+def train_lgbm(
+    X_train: pd.DataFrame, y_train: pd.DataFrame, model_options: dict
+) -> dict:
+    random_state = model_options['random_state']
+    test_size = model_options['test_size']
+
+    X_train.columns = X_train.columns.str.replace(' ', '')
+
+    # param_distrs = {'n_estimators': randint(low=20, high=201)}
+    param_distrs = {
+        'num_leaves': randint(low=10, high=51),
+        'min_child_samples': randint(low=10, high=101),
+        # 'max_depth': randint(low=20, high=121),
+        'n_estimators': randint(low=10, high=101),
+        'reg_alpha': uniform(loc=0, scale=2.5),
+        'reg_lambda': uniform(loc=0, scale=2.5),
+        'learning_rate': uniform(loc=0.1, scale=0.5),
+    }
+
+    lgbm_cls = LGBMClassifier(
+        objective='binary',
+        class_weight='balanced',
+        random_state=random_state,
+        n_jobs=8,
+        verbosity=0,
+    )
+
+    lgbm_cv = RandomizedSearchCV(
+        estimator=lgbm_cls,
+        param_distributions=param_distrs,
+        n_iter=10000,
+        scoring='average_precision',
+        verbose=10,
+        random_state=random_state,
+    )
+
+    lgbm_cv.fit(X_train, y_train.values.ravel())
+    best_lgbm = lgbm_cv.best_estimator_
+
+    lgbmX_train, lgbmX_val, lgbmY_train, lgbmY_val = train_test_split(
+        X_train,
+        y_train,
+        random_state=random_state,
+        stratify=y_train,
+        test_size=test_size,
+    )
+
+    best_cloned = clone(best_lgbm)
+    best_cloned.set_params(early_stopping_rounds=10)
+    best_cloned.fit(
+        lgbmX_train,
+        lgbmY_train.values.ravel(),
+        eval_metric='average_precision',
+        eval_set=[(lgbmX_val, lgbmY_val.values.ravel())],
+    )
+
+    return {'final_model': best_cloned, 'best_params': lgbm_cv.best_params_}

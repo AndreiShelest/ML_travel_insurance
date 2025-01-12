@@ -3,6 +3,7 @@ from .model_training import (
     train_logistic_regression,
     train_neural_network,
     train_xgboost,
+    train_lgbm,
 )
 
 
@@ -38,6 +39,16 @@ def create_pipeline(**kwargs) -> Pipeline:
                 ],
                 outputs='xgboost_trained',
                 name='train_xgboost',
+            ),
+            node(
+                func=train_lgbm,
+                inputs=[
+                    'TI_train_feature',
+                    'TI_y_train_feature',
+                    'params:model_options',
+                ],
+                outputs='lgbm_trained',
+                name='train_lgbm',
             ),
         ]
     )
