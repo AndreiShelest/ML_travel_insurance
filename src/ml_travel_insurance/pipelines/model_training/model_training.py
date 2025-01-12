@@ -1,8 +1,17 @@
 import os
 import pandas as pd
 import numpy as np
+from xgboost import XGBClassifier
+from sklearn.base import clone
 from sklearn.linear_model import LogisticRegressionCV
-from sklearn.model_selection import ParameterGrid, StratifiedKFold
+from sklearn.model_selection import (
+    ParameterGrid,
+    StratifiedKFold,
+    RandomizedSearchCV,
+    train_test_split,
+)
+from scipy.stats import uniform, randint
+
 import tensorflow as tf
 
 import logging
@@ -204,3 +213,67 @@ def _get_neural_network(
     )
 
     return model
+
+
+def train_xgboost(
+    X_train: pd.DataFrame, y_train: pd.DataFrame, model_options: dict
+) -> dict:
+    random_state = model_options['random_state']
+    test_size = model_options['test_size']
+
+    # param_grid = {
+    #     'n_estimators': np.arange(20, 201, 20),
+    #     'max_depth': [1, 2, 3, 5, 7, 10],
+    #     'max_leaves': np.arange(0, 11, 2),
+    #     'learning_rate': [0.01, 0.05, 0.1, 0.3, 0.4, 0.5],
+    #     'max_delta_step': np.arange(0, 11, 1),
+    #     'subsample': np.arange(0.2, 1.01, 0.2),
+    #     'reg_alpha': np.arange(0, 2.01, 0.2),
+    #     'reg_lambda': np.arange(0, 2.01, 0.2),
+    #     'scale_pos_weight': [1, 10, 20, 50, 100, 200, 1000],
+    # }
+
+    param_distrs = {
+        'n_estimators': randint(low=20, high=201),
+        'max_depth': randint(low=1, high=11),
+        'max_leaves': randint(low=0, high=11),
+        'learning_rate': uniform(loc=0.01, scale=0.5),
+        'max_delta_step': uniform(loc=0, scale=10),
+        'subsample': uniform(loc=0.2, scale=0.8),
+        'reg_alpha': uniform(loc=0, scale=5),
+        'reg_lambda': uniform(loc=0, scale=5),
+        'scale_pos_weight': uniform(loc=1, scale=1000),
+    }
+    # param_grid = {'n_estimators': [200], 'max_depth': [3], 'scale_pos_weight': [100]}
+
+    xgb_cls = XGBClassifier(
+        objective='binary:logistic', random_state=random_state, eval_metric='aucpr'
+    )
+
+    xgboost_cv = RandomizedSearchCV(
+        estimator=xgb_cls,
+        param_distributions=param_distrs,
+        n_iter=10000,
+        scoring='average_precision',
+        n_jobs=4,
+        verbose=3,
+        random_state=random_state,
+    )
+
+    xgboost_cv.fit(X_train, y_train)
+    best_xgboost = xgboost_cv.best_estimator_
+
+    # retrain model on best parameters with early stopping
+    bX_train, bX_val, bY_train, bY_val = train_test_split(
+        X_train,
+        y_train,
+        random_state=random_state,
+        stratify=y_train,
+        test_size=test_size,
+    )
+
+    best_cloned = clone(best_xgboost)
+    best_cloned.set_params(early_stopping_rounds=10, eval_metric='aucpr')
+    best_cloned.fit(bX_train, bY_train, eval_set=[(bX_val, bY_val)])
+
+    return {'final_model': best_cloned, 'best_params': xgboost_cv.best_params_}
