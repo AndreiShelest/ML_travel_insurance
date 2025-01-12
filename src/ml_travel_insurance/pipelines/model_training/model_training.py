@@ -225,8 +225,7 @@ def train_xgboost(
     param_distrs = {
         'n_estimators': randint(low=20, high=201),
         'max_depth': randint(low=1, high=11),
-        'max_leaves': randint(low=0, high=11),
-        'learning_rate': uniform(loc=0.01, scale=0.5),
+        'learning_rate': uniform(loc=0.1, scale=0.5),
         'max_delta_step': uniform(loc=0, scale=10),
         'subsample': uniform(loc=0.2, scale=0.8),
         'reg_alpha': uniform(loc=0, scale=5),
@@ -234,14 +233,12 @@ def train_xgboost(
         'scale_pos_weight': uniform(loc=1, scale=1000),
     }
 
-    xgb_cls = XGBClassifier(
-        objective='binary:logistic', random_state=random_state, eval_metric='aucpr'
-    )
+    xgb_cls = XGBClassifier(objective='binary:logistic', random_state=random_state)
 
     xgboost_cv = RandomizedSearchCV(
         estimator=xgb_cls,
         param_distributions=param_distrs,
-        n_iter=10000,
+        n_iter=1000,
         scoring='average_precision',
         n_jobs=4,
         verbose=10,
@@ -279,7 +276,6 @@ def train_lgbm(
     param_distrs = {
         'num_leaves': randint(low=10, high=51),
         'min_child_samples': randint(low=10, high=101),
-        # 'max_depth': randint(low=20, high=121),
         'n_estimators': randint(low=10, high=101),
         'reg_alpha': uniform(loc=0, scale=2.5),
         'reg_lambda': uniform(loc=0, scale=2.5),
