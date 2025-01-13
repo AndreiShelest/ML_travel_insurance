@@ -238,7 +238,7 @@ def train_xgboost(
     xgboost_cv = RandomizedSearchCV(
         estimator=xgb_cls,
         param_distributions=param_distrs,
-        n_iter=1000,
+        n_iter=10000,
         scoring='average_precision',
         n_jobs=4,
         verbose=10,
